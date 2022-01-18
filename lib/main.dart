@@ -30,22 +30,22 @@ class ScratchWin extends StatefulWidget {
 }
 
 class _ScratchWinState extends State<ScratchWin> {
-  int _wincounter = 0;
-  int _scratchcounter = 4;
+  int wincounter = 0;
+  int scratchcounter = 4;
 
   void _incrementWins() {
     setState(() {
-      _wincounter++;
+      wincounter++;
     });
   }
 
   void _incrementScratches() {
     setState(() {
-      _scratchcounter--;
+      scratchcounter--;
     });
   }
 
-  final List<int> _scratchBoard = [
+  List<int> scratchBoard = [
     0,
     0,
     0,
@@ -73,7 +73,7 @@ class _ScratchWinState extends State<ScratchWin> {
     0
   ];
 
-  final List<int> _mask = [
+  List<int> mask = [
     0,
     0,
     0,
@@ -103,27 +103,92 @@ class _ScratchWinState extends State<ScratchWin> {
 
   void _boardInit() {
     setState(() {
+      scratchBoard = [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ];
+
+      mask = [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ];
+
       for (int i = 0; i < 3; i++) {
-        _scratchBoard[Random().nextInt(25)] = 1;
+        int randomIndex = Random().nextInt(25);
+        while (true) {
+          if (scratchBoard[randomIndex] == 1) {
+            randomIndex = Random().nextInt(25);
+          } else {
+            scratchBoard[randomIndex] = 1;
+            break;
+          }
+        }
+        scratchBoard[randomIndex] = 1;
       }
 
       for (int i = 0; i < 25; i++) {
-        if (_scratchBoard[i] != 0) {
-          _scratchBoard[i] = -1;
+        if (scratchBoard[i] != 1) {
+          scratchBoard[i] = -1;
         }
 
-        _mask[i] = 0;
+        mask[i] = 0;
       }
 
-      _scratchcounter = 4;
-      _wincounter = 0;
+      scratchcounter = 4;
+      wincounter = 0;
     });
   }
 
   void _handleTap(int index) {
-    setState(() {
-      int prize = _scratchBoard[index];
+    int prize = scratchBoard[index];
 
+    setState(() {
       if (prize == 1) {
         _incrementWins();
         _incrementScratches();
@@ -131,21 +196,25 @@ class _ScratchWinState extends State<ScratchWin> {
         _incrementScratches();
       }
 
-      _mask[index] = prize;
-
-      if (_scratchcounter == 0) {
-        _showAllImages();
-        Future.delayed(const Duration(seconds: 5), () {
-          _showWinDialog();
-        });
-      }
+      mask[index] = prize;
     });
+
+    if (scratchcounter == 0) {
+      _showAllImages();
+      Future.delayed(const Duration(seconds: 3), () {
+        _showWinDialog();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    _boardInit();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _boardInit();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Scratch and win"),
@@ -160,7 +229,7 @@ class _ScratchWinState extends State<ScratchWin> {
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Text(
-                    "Wins: $_wincounter",
+                    "Wins: $wincounter",
                     style: const TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -189,9 +258,9 @@ class _ScratchWinState extends State<ScratchWin> {
                       ),
                     ),
                     child: Center(
-                      child: _mask[index] == 0
+                      child: mask[index] == 0
                           ? Image.asset('images/circle.png')
-                          : _mask[index] == 1
+                          : mask[index] == 1
                               ? Image.asset('images/rupee.png')
                               : Image.asset('images/sadFace.png'),
                     ),
@@ -211,7 +280,7 @@ class _ScratchWinState extends State<ScratchWin> {
                   ),
                   style: ButtonStyle(
                     backgroundColor:
-                        MaterialStateProperty.all(Colors.amber[600]),
+                        MaterialStateProperty.all(Colors.amber[800]),
                     foregroundColor: MaterialStateProperty.all(Colors.black),
                   ),
                 ),
@@ -281,7 +350,7 @@ class _ScratchWinState extends State<ScratchWin> {
   void _showAllImages() {
     setState(() {
       for (int i = 0; i < 25; i++) {
-        _mask[i] = _scratchBoard[i];
+        mask[i] = scratchBoard[i];
       }
     });
   }
@@ -289,7 +358,7 @@ class _ScratchWinState extends State<ScratchWin> {
   void _showWinDialog() {
     int reward = 0;
 
-    switch (reward) {
+    switch (wincounter) {
       case 1:
         reward = 50;
         break;
